@@ -3,7 +3,7 @@
 Plugin Name: Image Text Links
 Version: 0.1
 Plugin URI:
-Description: Hallo sarah en Kees. Een makkelijke manier om tekst links te maken van foto's als je een postje schrijft.
+Description: Adds a metabox with image attachments in the Post edit screen and allows you to link the image. Select text in the timyMCE editor and and click an image to make a text link to the full size image.
 Author: keesiemeijer
 Author URI:
 License: GPL v2
@@ -199,9 +199,6 @@ if ( !class_exists( 'Image_Text_Links' ) ) {
 
 			$return = '';
 			$intro = '<p class="metabox-update">';
-
-			// this i
-			$intro .= '<p>' .  __( 'Hallo Sarah en Kees. Hiermee kan je makkelijk (text) linkjes maken van foto\'s. Selecteer text in de editor hierboven en klik een plaatje hieronder om er een link van te maken', $this->text_domain ) . '</p>';
 
 			$intro .= '<input id="update-image-links" class="be-button button-secondary" type="button" value="Update uploaded images" name="update-text-images"></p>';
 
