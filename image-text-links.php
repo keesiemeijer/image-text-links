@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Image Text Links
-Version: 0.1
+Version: 2.0.0
 Plugin URI:
 Description: Adds a metabox with image attachments in the Post edit screen and allows you to link the image. Select text in the timyMCE editor and and click an image to make a text link to the full size image.
 Author: keesiemeijer
@@ -76,8 +76,9 @@ if ( !class_exists( 'Image_Text_Links' ) ) {
 		function image_text_links_admin_scripts( $hook ) {
 
 			/* only load scripts on post.php and post-new.php */
-			if ( !in_array( $hook, array( 'post.php', 'post-new.php' ) ) )
+			if ( !in_array( $hook, array( 'post.php', 'post-new.php' ) ) ) {
 				return;
+			}
 
 			/* Register styles and scripts. */
 			wp_register_script( 'image-text-links-selected-js', $this->pluginurl . 'js/selected-text.js' );
@@ -169,7 +170,6 @@ if ( !class_exists( 'Image_Text_Links' ) ) {
 		public function gallery_display( $loop ) {
 
 			$gallery = '<div class="text-attachments-container">';
-
 			foreach ( $loop as $attachment ) {
 
 				$gallery .= '<div class="text-attachment" style="float: left; padding: 0 1em 1em 0;">';
@@ -204,10 +204,14 @@ if ( !class_exists( 'Image_Text_Links' ) ) {
 
 			$return .=  $intro;
 
+
 			$loop = $this->gallery_images( $post_id );
 
-			if ( empty( $loop ) )
+			if ( empty( $loop ) ) {
 				$return .= '<p>'. __( 'No images found.', $this->text_domain ) . '</p>';
+			} else {
+				$return .= '<p>' . __('Select text in the editor and click an image below to create a link to the image.', 'image-text-link') . '</p>';
+			}
 
 			$gallery = $this->gallery_display( $loop );
 

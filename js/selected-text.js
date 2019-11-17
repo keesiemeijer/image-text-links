@@ -1,104 +1,84 @@
 (function($, exports, window) {
 
-if (!exports) {
-    exports = {};
-    if (!$) {
-        window.fieldSelection = exports;
-    }
-}
+	var text_selector = '.editor-rich-text, .block-editor-rich-text';
 
-if ($) {
-    /**
-* Extend jQuery's prototype
-* @param {String} [text]
-* @return {Object|jQuery}
-*/
-    $.fn.fieldSelection = function(text) {
-        var ret;
+	if (!exports) {
+		exports = {};
+		if (!$) {
+			window.fieldSelection = exports;
+		}
+	}
 
-        this.each(function() {
-            this.focus();
-            ret = text == null ? exports.get(this) : exports.replace(this, text);
-        });
+	if ($) {
+		/**
+		 * Extend jQuery's prototype
+		 * @param {String} [text]
+		 * @return {Object|jQuery}
+		 */
+		$.fn.fieldSelection = function(text) {
+			var ret;
 
-        return ret || this;
-    };
-}
+			this.each(function() {
+				this.focus();
+				ret = text == null ? exports.get(this) : exports.replace(this, text);
+			});
 
-/**
-* Get selection.
-*
-* @param {Object} elem
-* @return {Object}
-*/
-exports.get = function(elem) {
-    var data = {start: 0, end: elem.value.length, length: 0},
-        range, textRange, dTextRange;
+			return ret || this;
+		};
+	}
 
-    // DOM 3
-    if (elem.selectionStart >= 0) {
-        data.start = elem.selectionStart;
-        data.end = elem.selectionEnd;
-        data.length = data.end - data.start;
-        data.text = elem.value.substr(data.start, data.length);
-    // IE
-    } else if (elem.ownerDocument.selection) {
-        range = elem.ownerDocument.selection.createRange();
-        if (!range) return data;
-        textRange = elem.createTextRange(),
-        dTextRange = textRange.duplicate();
-        textRange.moveToBookmark(range.getBookmark());
-        dTextRange.setEndPoint('EndToStart', textRange);
-        data.start = dTextRange.text.length;
-        data.end = dTextRange.text.length + range.text.length;
-        data.text = range.text;
-        data.length = range.text.length;
-    }
+	exports.get = function(elem) {
+		var data = { text: '' };
 
-    return data;
-}
+		if (typeof window.getSelection != "undefined") {
+			var sel = window.getSelection();
 
-/**
-* Replace selection.
-*
-* @param {Object} elem
-* @param {String} text
-*/
-exports.replace = function(elem, text) {
-    var start, end,
-        pos, scrollTop, scrollLeft,
-        range;
+			if (sel.rangeCount) {
+				var container = document.createElement("div");
+				for (var i = 0, len = sel.rangeCount; i < len; ++i) {
+					container.appendChild(sel.getRangeAt(i).cloneContents());
+				}
+				data.text = container.innerHTML;
+			}
+		}
 
-    // DOM 3
-    if (elem.selectionStart >= 0) {
-        start = elem.selectionStart;
-        end = elem.selectionEnd;
-        scrollTop = elem.scrollTop;
-        scrollLeft = elem.scrollLeft;
-        elem.value = elem.value.substr(0, start) + text + elem.value.substr(end);
-        pos = start + text.length;
-        elem.selectionStart = pos;
-        elem.selectionEnd = pos;
+		return data;
+	}
 
-        // Restore scroll position in FF after replacement.
-        elem.scrollTop = scrollTop;
-        elem.scrollLeft = scrollLeft;
-    // IE
-    } else if (elem.ownerDocument.selection) {
-        range = elem.ownerDocument.selection.createRange();
-        range.text = text;
-        range.move('character', 0);
-        range.select();
-    } else {
+	exports.replace = function(elem, html) {
+		var range;
 
-        // Browser not supported - set at the end.
-        elem.value += text;
+		if (window.getSelection && window.getSelection().getRangeAt) {
+			var sel = window.getSelection();
 
-        // Scroll to the end of textarea to show inserted.
-        elem.scrollTop = 100000;
-    }
-};
+			range = sel.getRangeAt(0);
+			range.deleteContents();
+
+			var div = document.createElement("div");
+			div.innerHTML = html;
+			var frag = document.createDocumentFragment(),
+				child;
+			while ((child = div.firstChild)) {
+				frag.appendChild(child);
+			}
+			range.insertNode(frag);
+
+			var block_id = $(elem).closest('div[data-block]').data("block");
+			if (!block_id) {
+				return;
+			}
+
+			var block = wp.data.select('core/block-editor').getBlock(block_id);
+			if (!block.hasOwnProperty('attributes')) {
+				return;
+			}
+
+			// Update block;
+			block.attributes.content = elem.firstChild.innerHTML;
+			wp.data.dispatch('core/block-editor').updateBlock(block_id, block);
+		}
+	}
 
 }(typeof jQuery != 'undefined' ? jQuery : null,
-  typeof exports != 'undefined' ? exports : null,
-  window));
+	typeof exports != 'undefined' ? exports : null,
+	window));
