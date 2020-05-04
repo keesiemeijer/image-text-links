@@ -8,20 +8,22 @@ jQuery(document).ready(function($) {
 	text_images_init();
 
 	// Gutenberg paragraph block
-	var richText = '.editor-rich-text, .block-editor-rich-text';
+	var richText = '.rich-text, .block-editor-rich-text__editable';
+
 	$(document).on('focus', richText, function() {
 		elem = $(this);
 		editor = 'text_block';
+
 	});
 
 	function get_selected_element() {
 		if ( window.getSelection && window.getSelection().getRangeAt) {
 			var anchorNode = window.getSelection().anchorNode;
 			if(anchorNode){
-				return anchorNode.parentNode.parentNode;
+				return anchorNode.parentNode;
 			}
 		} else if (document.selection && document.selection.createRange) {
-			return document.selection.createRange().parentElement().parentElement();
+			return document.selection.createRange().parentElement();
 		}
 
 		return false;
@@ -49,7 +51,7 @@ jQuery(document).ready(function($) {
 
 		img.click(function(e) {
 			e.preventDefault();
-			
+
 			var richTextSelected = get_selected_element()
 			if( ! richTextSelected || ! $(richTextSelected).is( richText ) ) {
 				elem = false;

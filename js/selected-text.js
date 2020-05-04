@@ -74,7 +74,7 @@
 			}
 
 			// Update block;
-			block.attributes.content = elem.firstChild.innerHTML;
+			block.attributes.content = elem.innerHTML;
 			wp.data.dispatch('core/block-editor').updateBlock(block_id, block);
 		}
 	}
